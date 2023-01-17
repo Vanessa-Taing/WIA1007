@@ -1,0 +1,48 @@
+import pandas as pd
+import lightgbm as lgb
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import classification_report
+
+df_train = pd.read_csv(r'C:\Users\user\Documents\WIA1007\train_data.csv', ",", encoding='utf-8', header=0)
+df_test = pd.read_csv(r'C:\Users\user\Documents\WIA1007\test_data.csv', ",", encoding='utf-8', header=0)
+x_train = df_train['text']
+y_train = df_train['category'].tolist()
+x_test = df_test['text']
+y_test = df_test['category'].tolist()
+vectorizer = TfidfVectorizer(
+    norm='l2',
+    max_features=1800
+)
+X_train = vectorizer.fit_transform(x_train).toarray()
+X_test = vectorizer.fit_transform(x_test).toarray()
+LGB_Classifier = lgb.LGBMClassifier(
+                      learning_rate=0.5,
+                      num_leaves=50,
+                      n_estimators=120,
+                      max_bin=200,
+                      random_state=99,
+                      device='cpu'
+                      )
+LGB_Classfier = LGB_Classifier.fit(X_train, y_train)
+Lgb_pred = LGB_Classfier.predict(X_test).astype(int)
+Lgb_accuracy = accuracy_score(y_test, Lgb_pred)
+Lgb_precision = precision_score(y_test, Lgb_pred)
+Lgb_recall = recall_score(y_test, Lgb_pred)
+Lgb_F_measure = f1_score(y_test, Lgb_pred)
+print("Accuracy: %f" % Lgb_accuracy)
+print("Precision: %f" % Lgb_precision)
+print("Recall: %f" % Lgb_recall)
+print("F_measure: %f" % Lgb_F_measure)
+Lgb_report = classification_report(y_test, Lgb_pred)
+print(Lgb_report)
+cm_cv = confusion_matrix(y_test, Lgb_pred)
+plt.figure(figsize=(10, 10))
+plt.title(label="LightGBM Model Confusion Matrix",
+          fontsize=30,
+          color="darkred")
+sns.heatmap(cm_cv, cmap="Reds", annot=True, fmt='')
+plt.show()
+
