@@ -5,7 +5,8 @@ import seaborn as sns
 from keras.layers import Dense
 from keras.models import Sequential
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, \
+    classification_report
 
 df_train = pd.read_csv(r'C:\Users\user\Documents\WIA1007\train_data.csv', ",", encoding='utf-8', header=0)
 df_test = pd.read_csv(r'C:\Users\user\Documents\WIA1007\test_data.csv', ",", encoding='utf-8', header=0)
@@ -14,14 +15,14 @@ y_train = np.array(df_train['category'].tolist())
 x_test = np.array(df_test['text'])
 y_test = np.array(df_test['category'].tolist())
 vectorizer = TfidfVectorizer(
-            norm='l2',
-            max_features=2000
-            )
+    norm='l2',
+    max_features=2000
+)
 
 X_train = vectorizer.fit_transform(x_train).toarray()
 X_test = vectorizer.fit_transform(x_test).toarray()
 model = Sequential()
-model.add(Dense(units=100, activation='relu', input_dim = X_train.shape[1]))
+model.add(Dense(units=100, activation='relu', input_dim=X_train.shape[1]))
 model.add(Dense(units=50, activation='relu'))
 model.add(Dense(units=25, activation='relu'))
 model.add(Dense(units=10, activation='relu'))
@@ -40,8 +41,8 @@ print("Accuracy: %f" % CNN_accuracy)
 print("Precision: %f" % CNN_precision)
 print("Recall: %f" % CNN_recall)
 print("F_measure: %f" % CNN_F_measure)
-
-
+CNN_report = classification_report(y_test, CNN_pred)
+print(CNN_report)
 cm_cv = confusion_matrix(y_test, CNN_pred)
 plt.figure(figsize=(10, 10))
 plt.title(label="CNN Model Confusion Matrix",
