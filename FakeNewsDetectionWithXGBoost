@@ -1,13 +1,10 @@
 import pandas as pd
-import numpy as np
 import xgboost as xgb
-import lightgbm as lgb
-from sklearn import metrics
-from sklearn.metrics import accuracy_score
-from sklearn.feature_extraction import text
-from sklearn.metrics import classification_report
-from sklearn.feature_extraction.text import CountVectorizer
+import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import classification_report
 
 df_train = pd.read_csv(r'C:\Users\user\Documents\WIA1007\train_data.csv', ",", encoding='utf-8', header=0)
 df_test = pd.read_csv(r'C:\Users\user\Documents\WIA1007\test_data.csv', ",", encoding='utf-8', header=0)
@@ -23,7 +20,7 @@ X_train = vectorizer.fit_transform(x_train).toarray()
 X_test = vectorizer.fit_transform(x_test).toarray()
 XGB_Classifier = xgb.XGBClassifier(learning_rate=0.5,
                                    n_estimators=100,
-                                   max_depth=6,
+                                   max_depth=7,
                                    gamma=5,
                                    objective='binary:logistic',
                                    random_state=99
@@ -31,13 +28,19 @@ XGB_Classifier = xgb.XGBClassifier(learning_rate=0.5,
 XGB_Classifier = XGB_Classifier.fit(X_train, y_train)
 Xgb_pred = XGB_Classifier.predict(X_test).astype(int)
 Xgb_accuracy = accuracy_score(y_test, Xgb_pred)
-Xgb_precision = metrics.precision_score(y_test, Xgb_pred)
-Xgb_recall = metrics.recall_score(y_test, Xgb_pred)
-Xgb_F_measure = metrics.f1_score(y_test, Xgb_pred)
-
+Xgb_precision = precision_score(y_test, Xgb_pred)
+Xgb_recall = recall_score(y_test, Xgb_pred)
+Xgb_F_measure = f1_score(y_test, Xgb_pred)
 print("Accuracy: %f" % Xgb_accuracy)
 print("Precision: %f" % Xgb_precision)
 print("Recall: %f" % Xgb_recall)
 print("F_measure: %f" % Xgb_F_measure)
-XGBC_report = classification_report(y_test, Xgb_pred)
-print(XGBC_report)
+Xgb_report = classification_report(y_test, Xgb_pred)
+print(Xgb_report)
+cm_cv = confusion_matrix(y_test, Xgb_pred)
+plt.figure(figsize=(10, 10))
+plt.title(label="XGBoost Model Confusion Matrix",
+          fontsize=30,
+          color="darkgreen")
+sns.heatmap(cm_cv, cmap="Greens", annot=True, fmt='')
+plt.show()
