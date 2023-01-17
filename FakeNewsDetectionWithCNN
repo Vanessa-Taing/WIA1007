@@ -1,28 +1,11 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import matplotlib.pyplot as plt
-import nltk
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.preprocessing import LabelBinarizer
-from nltk.corpus import stopwords
-from nltk.stem.porter import PorterStemmer
-from nltk.stem import WordNetLemmatizer
-from nltk.tokenize import word_tokenize, sent_tokenize
-from bs4 import BeautifulSoup
-import re, string, unicodedata
-from nltk.tokenize.toktok import ToktokTokenizer
-from nltk.stem import PorterStemmer, WordNetLemmatizer
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
-from sklearn.model_selection import train_test_split
-from string import punctuation
-from nltk import pos_tag
-from nltk.corpus import wordnet
-import keras
-from keras.models import Sequential
 from keras.layers import Dense
-import tensorflow as tf
+from keras.models import Sequential
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 
 df_train = pd.read_csv(r'C:\Users\user\Documents\WIA1007\train_data.csv', ",", encoding='utf-8', header=0)
 df_test = pd.read_csv(r'C:\Users\user\Documents\WIA1007\test_data.csv', ",", encoding='utf-8', header=0)
@@ -32,14 +15,11 @@ x_test = np.array(df_test['text'])
 y_test = np.array(df_test['category'].tolist())
 vectorizer = TfidfVectorizer(
             norm='l2',
-            max_features=1800
+            max_features=2000
             )
 
 X_train = vectorizer.fit_transform(x_train).toarray()
 X_test = vectorizer.fit_transform(x_test).toarray()
-
-print('BOW_cv_train:', X_train.shape)
-print('BOW_cv_test:', X_test.shape)
 model = Sequential()
 model.add(Dense(units=100, activation='relu', input_dim = X_train.shape[1]))
 model.add(Dense(units=50, activation='relu'))
@@ -48,12 +28,24 @@ model.add(Dense(units=10, activation='relu'))
 model.add(Dense(units=1, activation='sigmoid'))
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 model.fit(X_train, y_train, epochs=5)
-from joblib import dump, load
+from joblib import dump
 
 dump(model, 'CNN.model')
-pred = (model.predict(X_test) > 0.7)
-print(accuracy_score(pred, y_test))
-cm_cv = confusion_matrix(pred, y_test)
+CNN_pred = (model.predict(X_test) > 0.7)
+CNN_accuracy = accuracy_score(y_test, CNN_pred)
+CNN_precision = precision_score(y_test, CNN_pred)
+CNN_recall = recall_score(y_test, CNN_pred)
+CNN_F_measure = f1_score(y_test, CNN_pred)
+print("Accuracy: %f" % CNN_accuracy)
+print("Precision: %f" % CNN_precision)
+print("Recall: %f" % CNN_recall)
+print("F_measure: %f" % CNN_F_measure)
+
+
+cm_cv = confusion_matrix(y_test, CNN_pred)
 plt.figure(figsize=(10, 10))
+plt.title(label="CNN Model Confusion Matrix",
+          fontsize=30,
+          color="darkblue")
 sns.heatmap(cm_cv, cmap="Blues", annot=True, fmt='')
 plt.show()
