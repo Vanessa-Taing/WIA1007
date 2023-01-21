@@ -2,6 +2,7 @@ import pandas as pd
 import lightgbm as lgb
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.feature_extraction import text
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 from sklearn.metrics import classification_report
@@ -12,8 +13,10 @@ x_train = df_train['text']
 y_train = df_train['category'].tolist()
 x_test = df_test['text']
 y_test = df_test['category'].tolist()
+stopwords= text.ENGLISH_STOP_WORDS
 vectorizer = TfidfVectorizer(
     norm='l2',
+    stop_words=stopwords,
     max_features=1800
 )
 X_train = vectorizer.fit_transform(x_train).toarray()
@@ -45,4 +48,3 @@ plt.title(label="LightGBM Model Confusion Matrix",
           color="darkred")
 sns.heatmap(cm_cv, cmap="Reds", annot=True, fmt='')
 plt.show()
-
